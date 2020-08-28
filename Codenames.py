@@ -7,6 +7,7 @@ Author: David Chen
 """
 import pathlib
 import itertools
+import time
 from gensim.test.utils import datapath, get_tmpfile
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
@@ -38,25 +39,30 @@ class Codenames:
 
     def get_clues(self):
         """ Get clues for both players """
+        score_threshold = 0.3
         for team_num in range(1, 3):
-            scores = {}
-            for group_size in range(4, 1, -1):  # start with larger word groups
-                team_words = self.word_roles[f'Team {team_num}']
-                oppo_words = self.word_roles[f'Team {3 - team_num}']
+            scores_by_len = {}
+            team_words = self.word_roles[f'Team {team_num}']
+            oppo_words = self.word_roles[f'Team {3 - team_num}']
+            for group_size in range(4, 2, -1):  # start with larger word groups
+                scores = {}
                 assassin_word = self.word_roles['Assassin']
                 for word_group in itertools.combinations(team_words, group_size):
-                    result = self.model.most_similar(
-                        positive=list(word_group), negative=oppo_words + [assassin_word], topn=1)
-                    scores[word_group] = result[0]
-            # sort in descending order by scores
-            scores = {k: v for k, v in sorted(
-                scores.items(), key=lambda x: x[1][1], reverse=True)}
+                    result = self.model.most_similar_cosmul(
+                        positive=list(word_group), negative=[assassin_word], topn=1)
+                    if result[0][1] > score_threshold:
+                        scores[word_group] = result[0]
+                # sort in descending order by scores
+                scores = {k: v for k, v in sorted(
+                    scores.items(), key=lambda x: x[1][1], reverse=True)}
+                scores_by_len[group_size] = scores
             print(f'TEAM {team_num}: ')
             used_clues = set()
-            for i, (word_group, (clue, score)) in enumerate(scores.items()):
-                if clue not in used_clues:
-                    used_clues.add(clue)
-                    print(clue, word_group, f'{score:.3f}')
+            for scores in scores_by_len.values():
+                for i, (word_group, (clue, score)) in enumerate(scores.items()):
+                    if clue not in used_clues:
+                        used_clues.add(clue)
+                        print(clue, word_group, f'{score:.3f}')
 
 
 if __name__ == "__main__":
@@ -67,5 +73,7 @@ if __name__ == "__main__":
         'Assassin': 'lawyer'
     }
     # codenames = Codenames(word_roles=word_roles)
+    start_time = time.time()
     codenames = Codenames(word_roles=None)
     print(codenames.get_clues())
+    print(f'Finished in {time.time() - start_time:.3f}')
