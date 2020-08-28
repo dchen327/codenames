@@ -1,3 +1,9 @@
+"""
+The class WordChooser requires a spreadsheet with Codenames words, and allows
+for generating game boards.
+
+Author: David Chen
+"""
 import pandas as pd
 import random
 
