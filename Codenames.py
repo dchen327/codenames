@@ -5,14 +5,23 @@ spymaster, giving clues for each team.
 
 Author: David Chen
 """
+import pathlib
 from gensim.test.utils import datapath, get_tmpfile
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
-import pathlib
+from WordChooser import WordChooser
 
 
 class Codenames:
-    def __init__(self):
+    def __init__(self, word_roles=None):
+        self.load_glove()
+        if word_roles is None:  # generate from WordChooser
+            wordChooser = WordChooser('codenames_wordlist.xlsx')
+            self.word_roles = wordChooser.getWords()
+        else:
+            self.word_roles = word_roles
+
+    def load_glove(self):
         """ Load in Stanford GloVe vectors and initialize model """
         model_file = pathlib.Path('glove_model.bin')
         print('Gathering GloVe vectors...')
@@ -26,7 +35,11 @@ class Codenames:
             self.model = KeyedVectors.load_word2vec_format(word2vec_glove_file)
             self.model.save('glove_model.bin')
 
+    def get_clues(self):
+        """ Get clues for both players """
+        print(self.word_roles)
+
 
 if __name__ == "__main__":
     codenames = Codenames()
-    print(codenames.model.most_similar('banana'))
+    print(codenames.get_clues())

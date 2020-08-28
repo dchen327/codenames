@@ -26,6 +26,8 @@ class WordChooser:
         for col in range(0, len(duet_df.columns), 3):
             self.words += list(duet_df[col].dropna())
             self.words += list(duet_df[col + 1].dropna())
+        # remove two word words
+        self.words = [word for word in self.words if ' ' not in word]
 
     def getWords(self):
         """ Returns a list of 25 words for a game:
