@@ -48,12 +48,24 @@ class Codenames:
                     result = self.model.most_similar(
                         positive=list(word_group), negative=oppo_words + [assassin_word], topn=1)
                     scores[word_group] = result[0]
+            # sort in descending order by scores
             scores = {k: v for k, v in sorted(
                 scores.items(), key=lambda x: x[1][1], reverse=True)}
-            print(scores)
-            break
+            print(f'TEAM {team_num}: ')
+            used_clues = set()
+            for i, (word_group, (clue, score)) in enumerate(scores.items()):
+                if clue not in used_clues:
+                    used_clues.add(clue)
+                    print(clue, word_group, f'{score:.3f}')
 
 
 if __name__ == "__main__":
-    codenames = Codenames()
+    word_roles = {
+        'Team 1': ['boom', 'tooth', 'chest', 'santa', 'copper', 'cane', 'conductor', 'jeweler'],
+        'Team 2': ['nut', 'elephant', 'honey', 'crystal', 'paper', 'sling', 'window'],
+        'Neutral': ['drum', 'spot', 'jet', 'engine', 'dream', 'crane', 'slug', 'track', 'desk'],
+        'Assassin': 'lawyer'
+    }
+    # codenames = Codenames(word_roles=word_roles)
+    codenames = Codenames(word_roles=None)
     print(codenames.get_clues())
