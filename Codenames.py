@@ -68,12 +68,12 @@ class Codenames:
 if __name__ == "__main__":
     word_roles = {
         'Team 1': ['boom', 'tooth', 'chest', 'santa', 'copper', 'cane', 'conductor', 'jeweler'],
-        'Team 2': ['nut', 'elephant', 'honey', 'crystal', 'paper', 'sling', 'window'],
+        'Team 2': [],
         'Neutral': ['drum', 'spot', 'jet', 'engine', 'dream', 'crane', 'slug', 'track', 'desk'],
         'Assassin': 'lawyer'
     }
-    # codenames = Codenames(word_roles=word_roles)
     start_time = time.time()
+    # codenames = Codenames(word_roles=word_roles)
     codenames = Codenames(word_roles=None)
-    print(codenames.get_clues())
+    codenames.get_clues()
     print(f'Finished in {time.time() - start_time:.3f}')
