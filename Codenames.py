@@ -6,6 +6,7 @@ spymaster, giving clues for each team.
 Author: David Chen
 """
 import pathlib
+import itertools
 from gensim.test.utils import datapath, get_tmpfile
 from gensim.models import KeyedVectors
 from gensim.scripts.glove2word2vec import glove2word2vec
@@ -37,7 +38,20 @@ class Codenames:
 
     def get_clues(self):
         """ Get clues for both players """
-        print(self.word_roles)
+        for team_num in range(1, 3):
+            scores = {}
+            for group_size in range(4, 1, -1):  # start with larger word groups
+                team_words = self.word_roles[f'Team {team_num}']
+                oppo_words = self.word_roles[f'Team {3 - team_num}']
+                assassin_word = self.word_roles['Assassin']
+                for word_group in itertools.combinations(team_words, group_size):
+                    result = self.model.most_similar(
+                        positive=list(word_group), negative=oppo_words + [assassin_word], topn=1)
+                    scores[word_group] = result[0]
+            scores = {k: v for k, v in sorted(
+                scores.items(), key=lambda x: x[1][1], reverse=True)}
+            print(scores)
+            break
 
 
 if __name__ == "__main__":
